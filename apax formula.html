@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APAX LAB 200x 水質換算器</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f4f1ea; padding: 20px; color: #333; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h2 { text-align: center; color: #5d4037; margin-bottom: 20px; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.9em; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
+        button { width: 100%; padding: 15px; background-color: #5d4037; color: white; border: none; border-radius: 8px; margin-top: 25px; cursor: pointer; font-size: 1.1em; font-weight: bold; }
+        #result { margin-top: 20px; padding: 15px; border-top: 2px solid #eee; display: none; }
+        .res-item { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px; border-radius: 5px; }
+        .water { background: #e3f2fd; border-left: 5px solid #2196f3; }
+        .tonic { background: #e3f2fd; border-left: 5px solid #1e88e5; color: #0d47a1; }
+        .jamm { background: #fffde7; border-left: 5px solid #fdd835; color: #827717; }
+        .lylac { background: #e8f5e9; border-left: 5px solid #43a047; color: #1b5e20; }
+        .val { font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>☕ APAX 水質換算器</h2>
+    
+    <label>1. 剩餘水量 (ml)</label>
+    <input type="number" id="v_rem" value="100">
+    
+    <label>2. 目前配方</label>
+    <select id="old_type">
+        <option value="cupping">標準杯測 (Cupping)</option>
+        <option value="washed">水洗 (Washed)</option>
+        <option value="natural">日曬 (Natural)</option>
+        <option value="honey">蜜處理 (Honey)</option>
+        <option value="fermented">厭氧發酵 (Fermented)</option>
+        <option value="balanced">均衡 (Balanced/Lylac)</option>
+    </select>
+    
+    <hr style="margin-top:20px; border:0; border-top:1px dashed #ccc;">
+
+    <label>3. 目標總水量 (ml)</label>
+    <input type="number" id="v_target" value="600">
+    
+    <label>4. 目標配方</label>
+    <select id="new_type">
+        <option value="cupping">標準杯測 (Cupping)</option>
+        <option value="washed">水洗 (Washed)</option>
+        <option value="natural">日曬 (Natural)</option>
+        <option value="honey">蜜處理 (Honey)</option>
+        <option value="fermented">厭氧發酵 (Fermented)</option>
+        <option value="balanced">均衡 (Balanced/Lylac)</option>
+    </select>
+
+    <button onclick="calculate()">立刻換算補強量</button>
+
+    <div id="result">
+        <div class="res-item water"><span>💧 補純水：</span><span id="res_water" class="val">0</span> ml</div>
+        <div class="res-item tonic"><span>🔵 Tonic [1]：</span><span id="res_t" class="val">0</span> ml</div>
+        <div class="res-item jamm"><span>🟡 Jamm [2]：</span><span id="res_j" class="val">0</span> ml</div>
+        <div class="res-item lylac"><span>🟢 Lylac [3]：</span><span id="res_l" class="val">0</span> ml</div>
+        <p style="font-size: 0.8em; color: #888; text-align: center; margin-top: 15px;">*計算基於 200倍 濃縮液 (1ml:200ml)</p>
+    </div>
+</div>
+
+<script>
+    const recipes = {
+        "cupping":  [0.60, 0.25, 0.15],
+        "washed":   [0.60, 0.15, 0.25],
+        "natural":  [0.25, 0.60, 0.15],
+        "honey":    [0.25, 0.15, 0.60],
+        "fermented":[0.20, 0.40, 0.40],
+        "balanced": [0.00, 0.00, 1.00]
+    };
+
+    function calculate() {
+        const v_rem = parseFloat(document.getElementById('v_rem').value);
+        const old_type = document.getElementById('old_type').value;
+        const v_target = parseFloat(document.getElementById('v_target').value);
+        const new_type = document.getElementById('new_type').value;
+
+        if (v_target < v_rem) {
+            alert("目標水量必須大於剩餘水量喔！");
+            return;
+        }
+
+        const r_old = recipes[old_type];
+        const r_new = recipes[new_type];
+
+        // 計算現有量 (ml of concentrate)
+        const m_old = r_old.map(r => v_rem * (r / 200));
+        // 計算目標量 (ml of concentrate)
+        const m_target = r_new.map(r => v_target * (r / 200));
+        // 計算差額 (delta)
+        const delta = m_target.map((mt, i) => Math.max(0, mt - m_old[i]).toFixed(2));
+
+        document.getElementById('res_water').innerText = (v_target - v_rem);
+        document.getElementById('res_t').innerText = delta[0];
+        document.getElementById('res_j').innerText = delta[1];
+        document.getElementById('res_l').innerText = delta[2];
+        
+        document.getElementById('result').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
