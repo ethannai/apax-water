@@ -20,8 +20,12 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
+            /* 響應式排版核心：允許換行，電腦並排，手機上下 */
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap; 
+            gap: 20px;
         }
         .container {
             max-width: 500px;
@@ -30,6 +34,7 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
         h2 { text-align: center; margin-top: 0; color: var(--primary); }
         .section {
@@ -90,10 +95,19 @@
         .j-color { color: var(--jamm-color); font-weight: bold;}
         .l-color { color: var(--lylac-color); font-weight: bold;}
         .w-color { color: #fff; font-weight: bold;}
+
+        /* 指南表格樣式 */
+        .guide-table { width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left; }
+        .guide-table th, .guide-table td { padding: 8px 5px; border-bottom: 1px dashed #333; }
+        .guide-table th { border-bottom: 1px solid #444; color: #aaa; }
+        .guide-list { font-size: 0.85em; color: #ccc; padding-left: 20px; margin: 5px 0; }
+        .guide-list li { margin-bottom: 6px; }
+        .guide-list strong { color: #fff; }
     </style>
 </head>
 <body>
 
+<!-- 第一塊面版：換算器主體 -->
 <div class="container">
     <h2>APAX 換算器 v2.0</h2>
     
@@ -110,7 +124,7 @@
             <option value="honey">Honey (蜜處理)</option>
             <option value="fermented">Fermented (厭氧高發酵)</option>
             <option value="light">Light Roast (淺焙強化)</option>
-            <option value="balanced">Balanced (純 M2)</option>
+            <option value="balanced">Balanced (純 M2 均衡)</option>
         </select>
     </div>
 
@@ -126,7 +140,7 @@
             <option value="natural">Natural (日曬)</option>
             <option value="honey">Honey (蜜處理)</option>
             <option value="light">Light Roast (淺焙強化)</option>
-            <option value="balanced">Balanced (純 M2)</option>
+            <option value="balanced">Balanced (純 M2 均衡)</option>
             <option value="visual">✨ 視覺化座標模型 (自訂)</option>
         </select>
 
@@ -182,6 +196,59 @@
     </div>
 </div>
 
+<!-- 第二塊面版：官方精華指南 (Cheat Sheet) -->
+<div class="container">
+    <h2>📚 APAX 官方精華指南</h2>
+    
+    <div class="section">
+        <div class="section-title">1. 核心風味模組 (The Blends)</div>
+        <table class="guide-table">
+            <tr>
+                <th>配方</th>
+                <th>化學主力</th>
+                <th>風味表現</th>
+                <th>適合情境</th>
+            </tr>
+            <tr>
+                <td class="t-color">Tonic (藍)</td>
+                <td>鎂、氯</td>
+                <td>明亮、活潑、多汁</td>
+                <td>水洗豆、淺焙、缺乏亮度的咖啡</td>
+            </tr>
+            <tr>
+                <td class="j-color">Jamm (黃)</td>
+                <td>鈣、鹼度</td>
+                <td>濃郁、甜美、奶油感</td>
+                <td>日曬豆、中焙、口感單薄或太尖酸</td>
+            </tr>
+            <tr>
+                <td class="l-color">Lylac (綠)</td>
+                <td>硫酸根、鉀</td>
+                <td>優雅、花香、絲滑</td>
+                <td>花香調咖啡、要求精緻觸感的淺焙</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. 離子圖表邏輯 (Apax Ion Chart)</div>
+        <ul class="guide-list">
+            <li><strong>X 軸 (水平)：</strong>代表醇厚度與口感 (Body and Mouthfeel)，數值越高口感越厚實。</li>
+            <li><strong>Y 軸 (垂直)：</strong>代表明亮度與酸質 (Brightness and Acidity)，數值越高酸質越活潑。</li>
+            <li><strong>小三角形 (低天花板)：</strong>如鈉、碳酸氫根(小蘇打)。極度敏感，加一點點就有效果，過量會產生負面鹹味。</li>
+            <li><strong>大三角形 (高天花板)：</strong>如鎂、氯。容錯率較高，能在較寬範圍內提升品質。</li>
+        </ul>
+    </div>
+
+    <div class="section" style="margin-bottom: 0;">
+        <div class="section-title">3. 添加時機 (Pre-Brew vs Post-Brew)</div>
+        <ul class="guide-list">
+            <li><strong>沖煮前 (Pre-Brew)：</strong>最高重複性、比賽級精準度、出杯效率高，適合建立穩定基準的吧台工作流。</li>
+            <li><strong>沖煮後 (Post-Brew)：</strong>最大彈性、直覺式盲測，適合測試新豆子、即刻修正酸甜平衡與探索風味邊界。</li>
+        </ul>
+    </div>
+</div>
+
 <script>
     // 定義基礎配方比例 (每 200ml 水含有多少 ml 濃縮液，總和固定為 1.0)
     const recipes = {
@@ -197,7 +264,6 @@
 
     let customRecipe = { t: 0.33, j: 0.33, l: 0.34 };
 
-    // 載入 localStorage 記憶設定
     window.onload = function() {
         if(localStorage.getItem('apax_remVol')) document.getElementById('remVol').value = localStorage.getItem('apax_remVol');
         if(localStorage.getItem('apax_remRecipe')) document.getElementById('remRecipe').value = localStorage.getItem('apax_remRecipe');
@@ -224,17 +290,14 @@
         document.getElementById('xVal').innerText = x;
         document.getElementById('yVal').innerText = y;
 
-        // 核心演算法：將 X/Y 映射至 Tonic, Jamm, Lylac
-        // 重疊區域轉化為平衡的 Lylac
         let lylacRaw = Math.min(x, y); 
-        let tonicRaw = Math.max(0, y - x); // 超出對角線的 Y 值為 Tonic
-        let jammRaw = Math.max(0, x - y);  // 超出對角線的 X 值為 Jamm
+        let tonicRaw = Math.max(0, y - x); 
+        let jammRaw = Math.max(0, x - y);  
         let total = lylacRaw + tonicRaw + jammRaw;
 
         if (total === 0) {
-            customRecipe = { t: 0, j: 0, l: 1.0 }; // 預設原點為平衡
+            customRecipe = { t: 0, j: 0, l: 1.0 }; 
         } else {
-            // 歸一化至總強度 1.0 (對應每 200ml 水 1.0ml 總量)
             customRecipe = {
                 t: tonicRaw / total,
                 j: jammRaw / total,
@@ -242,7 +305,6 @@
             };
         }
 
-        // 更新視覺化進度條
         document.getElementById('barT').style.width = (customRecipe.t * 100) + '%';
         document.getElementById('barJ').style.width = (customRecipe.j * 100) + '%';
         document.getElementById('barL').style.width = (customRecipe.l * 100) + '%';
@@ -250,7 +312,6 @@
     }
 
     function calculate() {
-        // 儲存設定至 localStorage
         localStorage.setItem('apax_remVol', document.getElementById('remVol').value);
         localStorage.setItem('apax_remRecipe', document.getElementById('remRecipe').value);
         localStorage.setItem('apax_targetVol', document.getElementById('targetVol').value);
@@ -271,23 +332,19 @@
         const oldR = recipes[remRecipeKey];
         const newR = (targetRecipeKey === 'visual') ? customRecipe : recipes[targetRecipeKey];
 
-        // 1. 計算剩餘水中已有的礦物量 (ml)
         const old_t = remVol * (oldR.t / 200);
         const old_j = remVol * (oldR.j / 200);
         const old_l = remVol * (oldR.l / 200);
 
-        // 2. 計算目標水總共需要的礦物量 (ml)
         const new_t = targetVol * (newR.t / 200);
         const new_j = targetVol * (newR.j / 200);
         const new_l = targetVol * (newR.l / 200);
 
-        // 3. 計算需補足的差額 (若舊水含量已超過目標，則補 0)
         const add_t = Math.max(0, new_t - old_t);
         const add_j = Math.max(0, new_j - old_j);
         const add_l = Math.max(0, new_l - old_l);
         const add_water = targetVol - remVol;
 
-        // 顯示結果
         document.getElementById('resWater').innerText = add_water.toFixed(0) + ' ml';
         document.getElementById('resTonic').innerText = '+ ' + add_t.toFixed(2) + ' ml';
         document.getElementById('resJamm').innerText = '+ ' + add_j.toFixed(2) + ' ml';
