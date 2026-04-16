@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APAX LAB 配方換算器 v3.0</title>
+    <title>APAX LAB 配方換算器 v3.1</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -56,30 +56,37 @@
             font-size: 1em;
         }
         
-        /* 拉桿與標記樣式 */
-        .slider-container { margin-bottom: 25px; }
+        /* v3.1 拉桿與打斜標記樣式 */
+        .slider-container { margin-bottom: 45px; } /* 增加底部邊距以容納打斜的文字 */
         .slider-label { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 5px; font-weight: bold;}
         input[type="range"] { width: 100%; margin: 0; }
-        .markers { position: relative; height: 15px; margin-top: 2px; }
+        .markers { position: relative; height: 10px; margin-top: 2px; }
         .markers span {
             position: absolute;
-            transform: translateX(-50%);
-            font-size: 0.65em;
-            color: #999;
-            white-space: nowrap;
-            text-align: center;
+            transform: translateX(-50%); /* 確保定位點在刻度正中央 */
         }
         .markers span::before {
             content: '';
             position: absolute;
-            top: -5px;
+            top: 0;
             left: 50%;
             width: 1px;
-            height: 4px;
-            background: #777;
+            height: 6px;
+            background: #777; /* 筆直的刻度指示線 */
+        }
+        .markers span i {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            font-style: normal;
+            font-size: 0.65em;
+            color: #aaa;
+            white-space: nowrap;
+            transform: rotate(45deg); /* 文字向右下傾斜 45 度 */
+            transform-origin: top left; /* 旋轉軸心固定在左上角，對齊指示線 */
         }
 
-        .bar-container { height: 10px; border-radius: 5px; display: flex; overflow: hidden; margin-top: 5px; background: #333; }
+        .bar-container { height: 10px; border-radius: 5px; display: flex; overflow: hidden; margin-top: 15px; background: #333; }
         .bar-t { background-color: var(--tonic-color); transition: width 0.3s; }
         .bar-j { background-color: var(--jamm-color); transition: width 0.3s; }
         .bar-l { background-color: var(--lylac-color); transition: width 0.3s; }
@@ -113,17 +120,13 @@
         .j-color { color: var(--jamm-color); }
         .l-color { color: var(--lylac-color); }
         .w-color { color: #fff; font-weight: bold;}
-
-        .guide-table { width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left; }
-        .guide-table th, .guide-table td { padding: 8px 5px; border-bottom: 1px dashed #333; }
-        .guide-table th { border-bottom: 1px solid #444; color: #aaa; }
     </style>
 </head>
 <body>
 
 <!-- 第一塊面版：換算器主體 -->
 <div class="container">
-    <h2>APAX 換算器 v3.0</h2>
+    <h2>APAX 換算器 v3.1</h2>
     
     <!-- 剩餘水設定 -->
     <div class="section">
@@ -149,21 +152,32 @@
             <div class="slider-label"><span class="t-color">🟦 Tonic (酸質)</span><span id="oldTVal">0</span></div>
             <input type="range" id="oldT" min="0" max="100" value="0" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 20%;">厭(20)</span><span style="left: 25%;">日/淺/蜜(25)</span><span style="left: 60%;">洗/杯(60)</span><span style="left: 75%;">深(75)</span>
+                <span style="left: 20%;"><i>厭(20)</i></span>
+                <span style="left: 25%;"><i>日/淺/蜜(25)</i></span>
+                <span style="left: 60%;"><i>洗/杯(60)</i></span>
+                <span style="left: 75%;"><i>深(75)</i></span>
             </div>
         </div>
         <div class="slider-container">
             <div class="slider-label"><span class="j-color">🟨 Jamm (甜感)</span><span id="oldJVal">0</span></div>
             <input type="range" id="oldJ" min="0" max="100" value="0" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;">洗/蜜(15)</span><span style="left: 25%;">杯(25)</span><span style="left: 40%;">厭(40)</span><span style="left: 60%;">日(60)</span><span style="left: 75%;">淺(75)</span>
+                <span style="left: 15%;"><i>洗/蜜(15)</i></span>
+                <span style="left: 25%;"><i>杯(25)</i></span>
+                <span style="left: 40%;"><i>厭(40)</i></span>
+                <span style="left: 60%;"><i>日(60)</i></span>
+                <span style="left: 75%;"><i>淺(75)</i></span>
             </div>
         </div>
-        <div class="slider-container">
+        <div class="slider-container" style="margin-bottom: 25px;">
             <div class="slider-label"><span class="l-color">🟩 Lylac (平衡)</span><span id="oldLVal">0</span></div>
             <input type="range" id="oldL" min="0" max="100" value="0" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;">杯/日(15)</span><span style="left: 25%;">洗/深(25)</span><span style="left: 40%;">厭(40)</span><span style="left: 60%;">蜜(60)</span><span style="left: 100%;">均(100)</span>
+                <span style="left: 15%;"><i>杯/日(15)</i></span>
+                <span style="left: 25%;"><i>洗/深(25)</i></span>
+                <span style="left: 40%;"><i>厭(40)</i></span>
+                <span style="left: 60%;"><i>蜜(60)</i></span>
+                <span style="left: 100%;"><i>均(100)</i></span>
             </div>
         </div>
         
@@ -198,21 +212,32 @@
             <div class="slider-label"><span class="t-color">🟦 Tonic (酸質)</span><span id="newTVal">60</span></div>
             <input type="range" id="newT" min="0" max="100" value="60" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 20%;">厭(20)</span><span style="left: 25%;">日/淺/蜜(25)</span><span style="left: 60%;">洗/杯(60)</span><span style="left: 75%;">深(75)</span>
+                <span style="left: 20%;"><i>厭(20)</i></span>
+                <span style="left: 25%;"><i>日/淺/蜜(25)</i></span>
+                <span style="left: 60%;"><i>洗/杯(60)</i></span>
+                <span style="left: 75%;"><i>深(75)</i></span>
             </div>
         </div>
         <div class="slider-container">
             <div class="slider-label"><span class="j-color">🟨 Jamm (甜感)</span><span id="newJVal">25</span></div>
             <input type="range" id="newJ" min="0" max="100" value="25" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;">洗/蜜(15)</span><span style="left: 25%;">杯(25)</span><span style="left: 40%;">厭(40)</span><span style="left: 60%;">日(60)</span><span style="left: 75%;">淺(75)</span>
+                <span style="left: 15%;"><i>洗/蜜(15)</i></span>
+                <span style="left: 25%;"><i>杯(25)</i></span>
+                <span style="left: 40%;"><i>厭(40)</i></span>
+                <span style="left: 60%;"><i>日(60)</i></span>
+                <span style="left: 75%;"><i>淺(75)</i></span>
             </div>
         </div>
-        <div class="slider-container">
+        <div class="slider-container" style="margin-bottom: 25px;">
             <div class="slider-label"><span class="l-color">🟩 Lylac (平衡)</span><span id="newLVal">15</span></div>
             <input type="range" id="newL" min="0" max="100" value="15" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;">杯/日(15)</span><span style="left: 25%;">洗/深(25)</span><span style="left: 40%;">厭(40)</span><span style="left: 60%;">蜜(60)</span><span style="left: 100%;">均(100)</span>
+                <span style="left: 15%;"><i>杯/日(15)</i></span>
+                <span style="left: 25%;"><i>洗/深(25)</i></span>
+                <span style="left: 40%;"><i>厭(40)</i></span>
+                <span style="left: 60%;"><i>蜜(60)</i></span>
+                <span style="left: 100%;"><i>均(100)</i></span>
             </div>
         </div>
 
@@ -221,7 +246,7 @@
             <div id="newBarJ" class="bar-j" style="width: 25%;"></div>
             <div id="newBarL" class="bar-l" style="width: 15%;"></div>
         </div>
-        <div id="newRatioText" class="ratio-text">T: 60% | J: 25% | L: 15%</div>
+        <div id="newRatioText" class="ratio-text">T: 60.0% | J: 25.0% | L: 15.0%</div>
     </div>
 
     <button onclick="calculate()">計算添加量與儲存</button>
@@ -251,7 +276,6 @@
 </div>
 
 <script>
-    // 官方預設配方比例 (百分比表示)
     const recipes = {
         none: { t: 0, j: 0, l: 0 },
         cupping: { t: 60, j: 25, l: 15 },
@@ -267,7 +291,6 @@
     let normNew = { t: 0.6, j: 0.25, l: 0.15 };
 
     window.onload = function() {
-        // 載入記憶數值
         if(localStorage.getItem('apax3_remVol')) document.getElementById('remVol').value = localStorage.getItem('apax3_remVol');
         if(localStorage.getItem('apax3_targetVol')) document.getElementById('targetVol').value = localStorage.getItem('apax3_targetVol');
         
@@ -278,22 +301,19 @@
         updateVisuals();
     };
 
-    // 快捷載入預設值
     function loadPreset(side) {
         const val = document.getElementById(side + 'Preset').value;
-        if (!val) return; // 如果選回 "--請選擇--" 則不動作
+        if (!val) return; 
         
         const r = recipes[val];
         document.getElementById(side + 'T').value = r.t;
         document.getElementById(side + 'J').value = r.j;
         document.getElementById(side + 'L').value = r.l;
         
-        // 載入後將下拉選單切回提示，鼓勵拉桿微調
         document.getElementById(side + 'Preset').value = "";
         updateVisuals();
     }
 
-    // 更新視覺化拉桿與進度條
     function updateVisuals() {
         ['old', 'new'].forEach(side => {
             const t = parseInt(document.getElementById(side + 'T').value);
@@ -313,11 +333,9 @@
                 pL = l / sum;
             }
 
-            // 更新實際使用於計算的比例變數
             if(side === 'old') normOld = { t: pT, j: pJ, l: pL };
             if(side === 'new') normNew = { t: pT, j: pJ, l: pL };
 
-            // 更新進度條
             document.getElementById(side + 'BarT').style.width = (pT * 100) + '%';
             document.getElementById(side + 'BarJ').style.width = (pJ * 100) + '%';
             document.getElementById(side + 'BarL').style.width = (pL * 100) + '%';
@@ -332,7 +350,6 @@
     }
 
     function calculate() {
-        // 儲存至 localStorage
         localStorage.setItem('apax3_remVol', document.getElementById('remVol').value);
         localStorage.setItem('apax3_targetVol', document.getElementById('targetVol').value);
         ['oldT', 'oldJ', 'oldL', 'newT', 'newJ', 'newL'].forEach(id => {
@@ -347,24 +364,19 @@
             return;
         }
 
-        // 計算舊水中含有的總量 (ml) 
-        // 公式: 水量 * (比例 / 200倍)
         const old_t = remVol * (normOld.t / 200);
         const old_j = remVol * (normOld.j / 200);
         const old_l = remVol * (normOld.l / 200);
 
-        // 計算目標水需要的總量 (ml)
         const new_t = targetVol * (normNew.t / 200);
         const new_j = targetVol * (normNew.j / 200);
         const new_l = targetVol * (normNew.l / 200);
 
-        // 差額計算，若為負值自動歸零
         const add_t = Math.max(0, new_t - old_t);
         const add_j = Math.max(0, new_j - old_j);
         const add_l = Math.max(0, new_l - old_l);
         const add_water = targetVol - remVol;
 
-        // 顯示結果
         document.getElementById('resWater').innerText = add_water.toFixed(0) + ' ml';
         document.getElementById('resTonic').innerText = '+ ' + add_t.toFixed(2) + ' ml';
         document.getElementById('resJamm').innerText = '+ ' + add_j.toFixed(2) + ' ml';
