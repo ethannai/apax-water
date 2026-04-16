@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APAX LAB 配方換算器 v3.1</title>
+    <title>APAX LAB 配方換算器 v3.2</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -56,14 +56,14 @@
             font-size: 1em;
         }
         
-        /* v3.1 拉桿與打斜標記樣式 */
-        .slider-container { margin-bottom: 45px; } /* 增加底部邊距以容納打斜的文字 */
+        /* 拉桿與打斜標記樣式 */
+        .slider-container { margin-bottom: 45px; } 
         .slider-label { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 5px; font-weight: bold;}
         input[type="range"] { width: 100%; margin: 0; }
         .markers { position: relative; height: 10px; margin-top: 2px; }
         .markers span {
             position: absolute;
-            transform: translateX(-50%); /* 確保定位點在刻度正中央 */
+            transform: translateX(-50%); 
         }
         .markers span::before {
             content: '';
@@ -72,7 +72,7 @@
             left: 50%;
             width: 1px;
             height: 6px;
-            background: #777; /* 筆直的刻度指示線 */
+            background: #777; 
         }
         .markers span i {
             position: absolute;
@@ -82,8 +82,8 @@
             font-size: 0.65em;
             color: #aaa;
             white-space: nowrap;
-            transform: rotate(45deg); /* 文字向右下傾斜 45 度 */
-            transform-origin: top left; /* 旋轉軸心固定在左上角，對齊指示線 */
+            transform: rotate(45deg); 
+            transform-origin: top left; 
         }
 
         .bar-container { height: 10px; border-radius: 5px; display: flex; overflow: hidden; margin-top: 15px; background: #333; }
@@ -120,13 +120,21 @@
         .j-color { color: var(--jamm-color); }
         .l-color { color: var(--lylac-color); }
         .w-color { color: #fff; font-weight: bold;}
+
+        /* 指南表格樣式 */
+        .guide-table { width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left; }
+        .guide-table th, .guide-table td { padding: 8px 5px; border-bottom: 1px dashed #333; }
+        .guide-table th { border-bottom: 1px solid #444; color: #aaa; }
+        .guide-list { font-size: 0.85em; color: #ccc; padding-left: 20px; margin: 5px 0; }
+        .guide-list li { margin-bottom: 6px; }
+        .guide-list strong { color: #fff; }
     </style>
 </head>
 <body>
 
 <!-- 第一塊面版：換算器主體 -->
 <div class="container">
-    <h2>APAX 換算器 v3.1</h2>
+    <h2>APAX 換算器 v3.2</h2>
     
     <!-- 剩餘水設定 -->
     <div class="section">
@@ -272,6 +280,59 @@
         <div style="font-size:0.8em; color:#888; margin-top:15px; text-align:center;">
             * 計算基準：200倍 DIY 濃縮液 (標準總強度 1.0ml/200ml水)
         </div>
+    </div>
+</div>
+
+<!-- 第二塊面版：官方精華指南 (Cheat Sheet) -->
+<div class="container">
+    <h2>📚 APAX 官方精華指南</h2>
+    
+    <div class="section">
+        <div class="section-title">1. 核心風味模組 (The Blends)</div>
+        <table class="guide-table">
+            <tr>
+                <th>配方</th>
+                <th>化學主力</th>
+                <th>風味表現</th>
+                <th>適合情境</th>
+            </tr>
+            <tr>
+                <td class="t-color">Tonic (藍)</td>
+                <td>鎂、氯</td>
+                <td>明亮、活潑、多汁</td>
+                <td>水洗豆、淺焙、缺乏亮度的咖啡</td>
+            </tr>
+            <tr>
+                <td class="j-color">Jamm (黃)</td>
+                <td>鈣、鹼度</td>
+                <td>濃郁、甜美、奶油感</td>
+                <td>日曬豆、中焙、口感單薄或太尖酸</td>
+            </tr>
+            <tr>
+                <td class="l-color">Lylac (綠)</td>
+                <td>硫酸根、鉀</td>
+                <td>優雅、花香、絲滑</td>
+                <td>花香調咖啡、要求精緻觸感的淺焙</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. 離子圖表邏輯 (Apax Ion Chart)</div>
+        <ul class="guide-list">
+            <li><strong>X 軸 (水平)：</strong>代表醇厚度與口感 (Body and Mouthfeel)，數值越高口感越厚實。</li>
+            <li><strong>Y 軸 (垂直)：</strong>代表明亮度與酸質 (Brightness and Acidity)，數值越高酸質越活潑。</li>
+            <li><strong>小三角形 (低天花板)：</strong>如鈉、碳酸氫根(小蘇打)。極度敏感，加一點點就有效果，過量會產生負面風味。</li>
+            <li><strong>大三角形 (高天花板)：</strong>如鎂、氯。容錯率較高，能在較寬範圍內提升品質。</li>
+        </ul>
+    </div>
+
+    <div class="section" style="margin-bottom: 0;">
+        <div class="section-title">3. 添加時機 (Pre-Brew vs Post-Brew)</div>
+        <ul class="guide-list">
+            <li><strong>沖煮前 (Pre-Brew)：</strong>最高重複性、比賽級精準度、出杯效率高，適合建立穩定基準的吧台工作流。</li>
+            <li><strong>沖煮後 (Post-Brew)：</strong>最大彈性、直覺式盲測，適合測試新豆子、即刻修正酸甜平衡與探索風味邊界。</li>
+        </ul>
     </div>
 </div>
 
