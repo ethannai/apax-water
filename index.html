@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APAX LAB 配方換算器 v3.2</title>
+    <title>APAX LAB 配方換算器 v3.3</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -134,7 +134,7 @@
 
 <!-- 第一塊面版：換算器主體 -->
 <div class="container">
-    <h2>APAX 換算器 v3.2</h2>
+    <h2>APAX 換算器 v3.3</h2>
     
     <!-- 剩餘水設定 -->
     <div class="section">
@@ -142,13 +142,13 @@
         <label>剩餘水量 (ml)</label>
         <input type="number" id="remVol" placeholder="例如: 150" value="0">
         
-        <label>快捷載入預設配方 (自動切換下方拉桿)</label>
+        <label>快速載入預設配方</label>
         <select id="oldPreset" onchange="loadPreset('old')">
-            <option value="">-- 請選擇 (或直接拉動下方拉桿) --</option>
+            <option value="">-- 請選擇 (自訂比例) --</option>
             <option value="none">純水 (無配方) 0/0/0</option>
             <option value="cupping">Cupping (標準杯測)</option>
-            <option value="washed">Washed (水洗)</option>
-            <option value="natural">Natural (日曬)</option>
+            <option value="washed">Washed (水洗處理)</option>
+            <option value="natural">Natural (日曬處理)</option>
             <option value="honey">Honey (蜜處理)</option>
             <option value="fermented">Fermented (厭氧高發酵)</option>
             <option value="light">Light Roast (淺焙強化)</option>
@@ -203,13 +203,13 @@
         <label>目標總水量 (ml)</label>
         <input type="number" id="targetVol" placeholder="例如: 600" value="600">
         
-        <label>快捷載入預設配方 (自動切換下方拉桿)</label>
+        <label>快速載入預設配方</label>
         <select id="newPreset" onchange="loadPreset('new')">
-            <option value="">-- 請選擇 (或直接拉動下方拉桿) --</option>
+            <option value="">-- 請選擇 (自訂比例) --</option>
             <option value="fermented">Fermented (厭氧高發酵)</option>
             <option value="cupping">Cupping (標準杯測)</option>
-            <option value="washed">Washed (水洗)</option>
-            <option value="natural">Natural (日曬)</option>
+            <option value="washed">Washed (水洗處理)</option>
+            <option value="natural">Natural (日曬處理)</option>
             <option value="honey">Honey (蜜處理)</option>
             <option value="light">Light Roast (淺焙強化)</option>
             <option value="balanced">Balanced (純 M2 均衡)</option>
@@ -355,11 +355,15 @@
         if(localStorage.getItem('apax3_remVol')) document.getElementById('remVol').value = localStorage.getItem('apax3_remVol');
         if(localStorage.getItem('apax3_targetVol')) document.getElementById('targetVol').value = localStorage.getItem('apax3_targetVol');
         
+        if(localStorage.getItem('apax3_oldPreset')) document.getElementById('oldPreset').value = localStorage.getItem('apax3_oldPreset');
+        if(localStorage.getItem('apax3_newPreset')) document.getElementById('newPreset').value = localStorage.getItem('apax3_newPreset');
+        
         ['oldT', 'oldJ', 'oldL', 'newT', 'newJ', 'newL'].forEach(id => {
             if(localStorage.getItem('apax3_' + id)) document.getElementById(id).value = localStorage.getItem('apax3_' + id);
         });
 
-        updateVisuals();
+        // 載入時執行一次視覺更新 (不觸發防呆還原)
+        updateVisuals(true);
     };
 
     function loadPreset(side) {
@@ -371,11 +375,11 @@
         document.getElementById(side + 'J').value = r.j;
         document.getElementById(side + 'L').value = r.l;
         
-        document.getElementById(side + 'Preset').value = "";
-        updateVisuals();
+        // 告訴 updateVisuals 這是來自選單的更新，不要把選單清空
+        updateVisuals(true);
     }
 
-    function updateVisuals() {
+    function updateVisuals(fromPreset = false) {
         ['old', 'new'].forEach(side => {
             const t = parseInt(document.getElementById(side + 'T').value);
             const j = parseInt(document.getElementById(side + 'J').value);
@@ -407,12 +411,26 @@
             } else {
                 textDiv.innerText = `T: ${(pT*100).toFixed(1)}% | J: ${(pJ*100).toFixed(1)}% | L: ${(pL*100).toFixed(1)}%`;
             }
+            
+            // 智慧防呆：如果是手動拉桿導致數值更新，且與目前選單的官方數值不符，自動將選單切換為"請選擇(自訂)"
+            if (fromPreset !== true) {
+                const presetSelect = document.getElementById(side + 'Preset');
+                const currentVal = presetSelect.value;
+                if (currentVal && currentVal !== "") {
+                    const r = recipes[currentVal];
+                    if (t !== r.t || j !== r.j || l !== r.l) {
+                        presetSelect.value = "";
+                    }
+                }
+            }
         });
     }
 
     function calculate() {
         localStorage.setItem('apax3_remVol', document.getElementById('remVol').value);
         localStorage.setItem('apax3_targetVol', document.getElementById('targetVol').value);
+        localStorage.setItem('apax3_oldPreset', document.getElementById('oldPreset').value);
+        localStorage.setItem('apax3_newPreset', document.getElementById('newPreset').value);
         ['oldT', 'oldJ', 'oldL', 'newT', 'newJ', 'newL'].forEach(id => {
             localStorage.setItem('apax3_' + id, document.getElementById(id).value);
         });
@@ -446,6 +464,9 @@
         document.getElementById('resultBox').style.display = 'block';
     }
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
