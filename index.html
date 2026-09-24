@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>APAX LAB 配方換算器 v3.3</title>
+    <!-- 支援 iPhone 加入主畫面後的獨立 App 體驗 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>APAX 二元母液換算器 v4.0</title>
     <style>
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #ffffff;
-            --tonic-color: #4facfe;
-            --jamm-color: #fdd835;
-            --lylac-color: #69f0ae;
+            --gh-color: #4facfe;   /* 瓶 A 藍色 */
+            --kh-color: #fdd835;   /* 瓶 B 黃色 */
             --primary: #bb86fc;
         }
         body {
@@ -56,7 +58,6 @@
             font-size: 1em;
         }
         
-        /* 拉桿與打斜標記樣式 */
         .slider-container { margin-bottom: 45px; } 
         .slider-label { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 5px; font-weight: bold;}
         input[type="range"] { width: 100%; margin: 0; }
@@ -87,9 +88,8 @@
         }
 
         .bar-container { height: 10px; border-radius: 5px; display: flex; overflow: hidden; margin-top: 15px; background: #333; }
-        .bar-t { background-color: var(--tonic-color); transition: width 0.3s; }
-        .bar-j { background-color: var(--jamm-color); transition: width 0.3s; }
-        .bar-l { background-color: var(--lylac-color); transition: width 0.3s; }
+        .bar-gh { background-color: var(--gh-color); transition: width 0.3s; }
+        .bar-kh { background-color: var(--kh-color); transition: width 0.3s; }
         .ratio-text { font-size: 0.85em; color: #ddd; text-align: right; margin-top: 8px; }
 
         button {
@@ -116,12 +116,10 @@
         .result h3 { margin-top: 0; color: var(--primary); font-size: 1.2em; }
         .res-item { display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #444; }
         .res-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .t-color { color: var(--tonic-color); }
-        .j-color { color: var(--jamm-color); }
-        .l-color { color: var(--lylac-color); }
+        .gh-color { color: var(--gh-color); }
+        .kh-color { color: var(--kh-color); }
         .w-color { color: #fff; font-weight: bold;}
 
-        /* 指南表格樣式 */
         .guide-table { width: 100%; border-collapse: collapse; font-size: 0.85em; text-align: left; }
         .guide-table th, .guide-table td { padding: 8px 5px; border-bottom: 1px dashed #333; }
         .guide-table th { border-bottom: 1px solid #444; color: #aaa; }
@@ -132,9 +130,9 @@
 </head>
 <body>
 
-<!-- 第一塊面版：換算器主體 -->
+<!-- 面版一：二元母液換算器主體 -->
 <div class="container">
-    <h2>APAX 換算器 v3.3</h2>
+    <h2>APAX 二元母液換算器 v4.0</h2>
     
     <!-- 剩餘水設定 -->
     <div class="section">
@@ -144,55 +142,44 @@
         
         <label>快速載入預設配方</label>
         <select id="oldPreset" onchange="loadPreset('old')">
-            <option value="">-- 請選擇 (自訂比例) --</option>
-            <option value="none">純水 (無配方) 0/0/0</option>
+            <option value="">-- 請選擇 (自訂強度) --</option>
+            <option value="none">純水 (無配方)</option>
             <option value="cupping">Cupping (標準杯測)</option>
-            <option value="washed">Washed (水洗處理)</option>
-            <option value="natural">Natural (日曬處理)</option>
+            <option value="washed">Washed (水洗 / 淺焙)</option>
+            <option value="natural">Natural (經典日曬)</option>
             <option value="honey">Honey (蜜處理)</option>
-            <option value="fermented">Fermented (厭氧高發酵)</option>
-            <option value="light">Light Roast (淺焙強化)</option>
-            <option value="balanced">Balanced (純 M2 均衡)</option>
+            <option value="fermented">Fermented (厭氧 / 熱衝擊)</option>
+            <option value="balanced">Balanced (M2 均衡)</option>
         </select>
 
-        <!-- Old Sliders -->
+        <!-- Old Sliders (基準：每 600ml 的注入 ml 數，對應 0~5ml) -->
         <div class="slider-container">
-            <div class="slider-label"><span class="t-color">🟦 Tonic (酸質)</span><span id="oldTVal">0</span></div>
-            <input type="range" id="oldT" min="0" max="100" value="0" oninput="updateVisuals()">
+            <div class="slider-label"><span class="gh-color">🟦 瓶 A 硬度 (GH 係數)</span><span id="oldGHVal">0.0</span> ml</div>
+            <input type="range" id="oldGH" min="0" max="40" value="0" step="1" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 20%;"><i>厭(20)</i></span>
-                <span style="left: 25%;"><i>日/淺/蜜(25)</i></span>
-                <span style="left: 60%;"><i>洗/杯(60)</i></span>
-                <span style="left: 75%;"><i>深(75)</i></span>
-            </div>
-        </div>
-        <div class="slider-container">
-            <div class="slider-label"><span class="j-color">🟨 Jamm (甜感)</span><span id="oldJVal">0</span></div>
-            <input type="range" id="oldJ" min="0" max="100" value="0" oninput="updateVisuals()">
-            <div class="markers">
-                <span style="left: 15%;"><i>洗/蜜(15)</i></span>
-                <span style="left: 25%;"><i>杯(25)</i></span>
-                <span style="left: 40%;"><i>厭(40)</i></span>
-                <span style="left: 60%;"><i>日(60)</i></span>
-                <span style="left: 75%;"><i>淺(75)</i></span>
+                <span style="left: 37.5%;"><i>厭(1.5)</i></span>
+                <span style="left: 42.5%;"><i>日(1.7)</i></span>
+                <span style="left: 45.0%;"><i>蜜(1.8)</i></span>
+                <span style="left: 50.0%;"><i>洗/均(2.0)</i></span>
+                <span style="left: 57.5%;"><i>杯(2.3)</i></span>
             </div>
         </div>
         <div class="slider-container" style="margin-bottom: 25px;">
-            <div class="slider-label"><span class="l-color">🟩 Lylac (平衡)</span><span id="oldLVal">0</span></div>
-            <input type="range" id="oldL" min="0" max="100" value="0" oninput="updateVisuals()">
+            <div class="slider-label"><span class="kh-color">🟨 瓶 B 緩衝 (KH 係數)</span><span id="oldKHVal">0.0</span> ml</div>
+            <input type="range" id="oldKH" min="0" max="40" value="0" step="1" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;"><i>杯/日(15)</i></span>
-                <span style="left: 25%;"><i>洗/深(25)</i></span>
-                <span style="left: 40%;"><i>厭(40)</i></span>
-                <span style="left: 60%;"><i>蜜(60)</i></span>
-                <span style="left: 100%;"><i>均(100)</i></span>
+                <span style="left: 25.0%;"><i>洗(1.0)</i></span>
+                <span style="left: 30.0%;"><i>杯(1.2)</i></span>
+                <span style="left: 45.0%;"><i>蜜(1.8)</i></span>
+                <span style="left: 50.0%;"><i>均(2.0)</i></span>
+                <span style="left: 60.0%;"><i>日(2.4)</i></span>
+                <span style="left: 75.0%;"><i>厭(3.0)</i></span>
             </div>
         </div>
         
         <div class="bar-container">
-            <div id="oldBarT" class="bar-t" style="width: 0%;"></div>
-            <div id="oldBarJ" class="bar-j" style="width: 0%;"></div>
-            <div id="oldBarL" class="bar-l" style="width: 0%;"></div>
+            <div id="oldBarGH" class="bar-gh" style="width: 0%;"></div>
+            <div id="oldBarKH" class="bar-kh" style="width: 0%;"></div>
         </div>
         <div id="oldRatioText" class="ratio-text">純水 / 未設定</div>
     </div>
@@ -205,56 +192,45 @@
         
         <label>快速載入預設配方</label>
         <select id="newPreset" onchange="loadPreset('new')">
-            <option value="">-- 請選擇 (自訂比例) --</option>
-            <option value="fermented">Fermented (厭氧高發酵)</option>
+            <option value="">-- 請選擇 (自訂強度) --</option>
             <option value="cupping">Cupping (標準杯測)</option>
-            <option value="washed">Washed (水洗處理)</option>
-            <option value="natural">Natural (日曬處理)</option>
+            <option value="washed">Washed (水洗 / 淺焙)</option>
+            <option value="natural" selected>Natural (經典日曬)</option>
             <option value="honey">Honey (蜜處理)</option>
-            <option value="light">Light Roast (淺焙強化)</option>
-            <option value="balanced">Balanced (純 M2 均衡)</option>
+            <option value="fermented">Fermented (厭氧 / 熱衝擊)</option>
+            <option value="balanced">Balanced (M2 均衡)</option>
         </select>
 
         <!-- New Sliders -->
         <div class="slider-container">
-            <div class="slider-label"><span class="t-color">🟦 Tonic (酸質)</span><span id="newTVal">60</span></div>
-            <input type="range" id="newT" min="0" max="100" value="60" oninput="updateVisuals()">
+            <div class="slider-label"><span class="gh-color">🟦 瓶 A 硬度 (GH 係數)</span><span id="newGHVal">1.7</span> ml</div>
+            <input type="range" id="newGH" min="0" max="40" value="17" step="1" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 20%;"><i>厭(20)</i></span>
-                <span style="left: 25%;"><i>日/淺/蜜(25)</i></span>
-                <span style="left: 60%;"><i>洗/杯(60)</i></span>
-                <span style="left: 75%;"><i>深(75)</i></span>
-            </div>
-        </div>
-        <div class="slider-container">
-            <div class="slider-label"><span class="j-color">🟨 Jamm (甜感)</span><span id="newJVal">25</span></div>
-            <input type="range" id="newJ" min="0" max="100" value="25" oninput="updateVisuals()">
-            <div class="markers">
-                <span style="left: 15%;"><i>洗/蜜(15)</i></span>
-                <span style="left: 25%;"><i>杯(25)</i></span>
-                <span style="left: 40%;"><i>厭(40)</i></span>
-                <span style="left: 60%;"><i>日(60)</i></span>
-                <span style="left: 75%;"><i>淺(75)</i></span>
+                <span style="left: 37.5%;"><i>厭(1.5)</i></span>
+                <span style="left: 42.5%;"><i>日(1.7)</i></span>
+                <span style="left: 45.0%;"><i>蜜(1.8)</i></span>
+                <span style="left: 50.0%;"><i>洗/均(2.0)</i></span>
+                <span style="left: 57.5%;"><i>杯(2.3)</i></span>
             </div>
         </div>
         <div class="slider-container" style="margin-bottom: 25px;">
-            <div class="slider-label"><span class="l-color">🟩 Lylac (平衡)</span><span id="newLVal">15</span></div>
-            <input type="range" id="newL" min="0" max="100" value="15" oninput="updateVisuals()">
+            <div class="slider-label"><span class="kh-color">🟨 瓶 B 緩衝 (KH 係數)</span><span id="newKHVal">2.4</span> ml</div>
+            <input type="range" id="newKH" min="0" max="40" value="24" step="1" oninput="updateVisuals()">
             <div class="markers">
-                <span style="left: 15%;"><i>杯/日(15)</i></span>
-                <span style="left: 25%;"><i>洗/深(25)</i></span>
-                <span style="left: 40%;"><i>厭(40)</i></span>
-                <span style="left: 60%;"><i>蜜(60)</i></span>
-                <span style="left: 100%;"><i>均(100)</i></span>
+                <span style="left: 25.0%;"><i>洗(1.0)</i></span>
+                <span style="left: 30.0%;"><i>杯(1.2)</i></span>
+                <span style="left: 45.0%;"><i>蜜(1.8)</i></span>
+                <span style="left: 50.0%;"><i>均(2.0)</i></span>
+                <span style="left: 60.0%;"><i>日(2.4)</i></span>
+                <span style="left: 75.0%;"><i>厭(3.0)</i></span>
             </div>
         </div>
 
         <div class="bar-container">
-            <div id="newBarT" class="bar-t" style="width: 60%;"></div>
-            <div id="newBarJ" class="bar-j" style="width: 25%;"></div>
-            <div id="newBarL" class="bar-l" style="width: 15%;"></div>
+            <div id="newBarGH" class="bar-gh" style="width: 41%;"></div>
+            <div id="newBarKH" class="bar-kh" style="width: 59%;"></div>
         </div>
-        <div id="newRatioText" class="ratio-text">T: 60.0% | J: 25.0% | L: 15.0%</div>
+        <div id="newRatioText" class="ratio-text">GH: 1.7 ml | KH: 2.4 ml (以600ml計)</div>
     </div>
 
     <button onclick="calculate()">計算添加量與儲存</button>
@@ -266,103 +242,112 @@
             <span id="resWater" class="w-color">0 ml</span>
         </div>
         <div class="res-item">
-            <span class="t-color">🟦 補 Tonic (藍)</span>
-            <span id="resTonic" class="t-color" style="font-weight:bold;">0.00 ml</span>
+            <span class="gh-color">🟦 補 瓶 A (硬度 GH)</span>
+            <span id="resGH" class="gh-color" style="font-weight:bold;">0.00 ml</span>
         </div>
         <div class="res-item">
-            <span class="j-color">🟨 補 Jamm (黃)</span>
-            <span id="resJamm" class="j-color" style="font-weight:bold;">0.00 ml</span>
-        </div>
-        <div class="res-item">
-            <span class="l-color">🟩 補 Lylac (綠)</span>
-            <span id="resLylac" class="l-color" style="font-weight:bold;">0.00 ml</span>
+            <span class="kh-color">🟨 補 瓶 B (緩衝 KH)</span>
+            <span id="resKH" class="kh-color" style="font-weight:bold;">0.00 ml</span>
         </div>
         <div style="font-size:0.8em; color:#888; margin-top:15px; text-align:center;">
-            * 計算基準：200倍 DIY 濃縮液 (標準總強度 1.0ml/200ml水)
+            * 計算基準：二元母液系統 (瓶A: 4ml DSW/100ml，瓶B: 0.84g小蘇打/100ml)
         </div>
     </div>
 </div>
 
-<!-- 第二塊面版：官方精華指南 (Cheat Sheet) -->
+<!-- 面版二：二元系統官方指南 -->
 <div class="container">
-    <h2>📚 APAX 官方精華指南</h2>
+    <h2>📚 二元母液配置與指南</h2>
     
     <div class="section">
-        <div class="section-title">1. 核心風味模組 (The Blends)</div>
+        <div class="section-title">1. 二元母液配製規格 (100ml 玻璃瓶)</div>
+        <ul class="guide-list">
+            <li><strong class="gh-color">瓶 A (純硬度 GH)：</strong>取 <strong>4.0 ml</strong> DSW-618 原液，加純水補滿至 100 ml。（無碳酸氫根，常溫存放絕不結晶）</li>
+            <li><strong class="kh-color">瓶 B (純緩衝 KH)：</strong>取 <strong>0.84 g</strong> 食用小蘇打粉，加純水補滿至 100 ml。（濃度僅 0.84%，完全遠離飽和線，告別結晶）</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. 各處理法標準基準 (每 600ml 純水)</div>
         <table class="guide-table">
             <tr>
                 <th>配方</th>
-                <th>化學主力</th>
-                <th>風味表現</th>
-                <th>適合情境</th>
+                <th>瓶 A (GH)</th>
+                <th>瓶 B (KH)</th>
+                <th>風味重點</th>
             </tr>
             <tr>
-                <td class="t-color">Tonic (藍)</td>
-                <td>鎂、氯</td>
-                <td>明亮、活潑、多汁</td>
-                <td>水洗豆、淺焙、缺乏亮度的咖啡</td>
+                <td class="gh-color">Cupping</td>
+                <td>2.3 ml</td>
+                <td>1.2 ml</td>
+                <td>全頻明亮、高解析</td>
             </tr>
             <tr>
-                <td class="j-color">Jamm (黃)</td>
-                <td>鈣、鹼度</td>
-                <td>濃郁、甜美、奶油感</td>
-                <td>日曬豆、中焙、口感單薄或太尖酸</td>
+                <td class="gh-color">Washed</td>
+                <td>2.0 ml</td>
+                <td>1.0 ml</td>
+                <td>柑橘果酸、花香清脆</td>
             </tr>
             <tr>
-                <td class="l-color">Lylac (綠)</td>
-                <td>硫酸根、鉀</td>
-                <td>優雅、花香、絲滑</td>
-                <td>花香調咖啡、要求精緻觸感的淺焙</td>
+                <td class="kh-color">Natural</td>
+                <td>1.7 ml</td>
+                <td>2.4 ml</td>
+                <td>莓果熟果、圓潤修酸</td>
+            </tr>
+            <tr>
+                <td class="kh-color">Honey</td>
+                <td>1.8 ml</td>
+                <td>1.8 ml</td>
+                <td>蜜糖質地、甜感延伸</td>
+            </tr>
+            <tr>
+                <td class="kh-color">Fermented</td>
+                <td>1.5 ml</td>
+                <td>3.0 ml</td>
+                <td>修飾刺酸、厚實底蘊</td>
+            </tr>
+            <tr>
+                <td>Balanced</td>
+                <td>2.0 ml</td>
+                <td>2.0 ml</td>
+                <td>酸甜黃金比、百搭通配</td>
             </tr>
         </table>
     </div>
 
-    <div class="section">
-        <div class="section-title">2. 離子圖表邏輯 (Apax Ion Chart)</div>
-        <ul class="guide-list">
-            <li><strong>X 軸 (水平)：</strong>代表醇厚度與口感 (Body and Mouthfeel)，數值越高口感越厚實。</li>
-            <li><strong>Y 軸 (垂直)：</strong>代表明亮度與酸質 (Brightness and Acidity)，數值越高酸質越活潑。</li>
-            <li><strong>小三角形 (低天花板)：</strong>如鈉、碳酸氫根(小蘇打)。極度敏感，加一點點就有效果，過量會產生負面風味。</li>
-            <li><strong>大三角形 (高天花板)：</strong>如鎂、氯。容錯率較高，能在較寬範圍內提升品質。</li>
-        </ul>
-    </div>
-
     <div class="section" style="margin-bottom: 0;">
-        <div class="section-title">3. 添加時機 (Pre-Brew vs Post-Brew)</div>
+        <div class="section-title">3. 吧台防呆操作叮嚀</div>
         <ul class="guide-list">
-            <li><strong>沖煮前 (Pre-Brew)：</strong>最高重複性、比賽級精準度、出杯效率高，適合建立穩定基準的吧台工作流。</li>
-            <li><strong>沖煮後 (Post-Brew)：</strong>最大彈性、直覺式盲測，適合測試新豆子、即刻修正酸甜平衡與探索風味邊界。</li>
+            <li><strong>兩瓶分開注入：</strong>先加純水進手沖壺或水瓶，再分別以兩支獨立針筒抽取瓶 A 與瓶 B 注入。</li>
+            <li><strong>嚴禁針筒混用：</strong>抽取瓶 A 的針筒切勿伸入瓶 B，避免瓶口微量離子交錯污染。</li>
+            <li><strong>常溫避光存放：</strong>母液直接放置在吧台常溫陰涼處，不可冷藏。</li>
         </ul>
     </div>
 </div>
 
 <script>
+    // 官方基準：以 600ml 純水對應之 ml 添加量
     const recipes = {
-        none: { t: 0, j: 0, l: 0 },
-        cupping: { t: 60, j: 25, l: 15 },
-        washed: { t: 60, j: 15, l: 25 },
-        natural: { t: 25, j: 60, l: 15 },
-        honey: { t: 25, j: 15, l: 60 },
-        fermented: { t: 20, j: 40, l: 40 },
-        light: { t: 25, j: 75, l: 0 },
-        balanced: { t: 0, j: 0, l: 100 }
+        none:      { gh: 0.0, kh: 0.0 },
+        cupping:   { gh: 2.3, kh: 1.2 },
+        washed:    { gh: 2.0, kh: 1.0 },
+        natural:   { gh: 1.7, kh: 2.4 },
+        honey:     { gh: 1.8, kh: 1.8 },
+        fermented: { gh: 1.5, kh: 3.0 },
+        balanced:  { gh: 2.0, kh: 2.0 }
     };
 
-    let normOld = { t: 0, j: 0, l: 0 };
-    let normNew = { t: 0.6, j: 0.25, l: 0.15 };
-
     window.onload = function() {
-        if(localStorage.getItem('apax3_remVol')) document.getElementById('remVol').value = localStorage.getItem('apax3_remVol');
-        if(localStorage.getItem('apax3_targetVol')) document.getElementById('targetVol').value = localStorage.getItem('apax3_targetVol');
+        if(localStorage.getItem('apax4_remVol')) document.getElementById('remVol').value = localStorage.getItem('apax4_remVol');
+        if(localStorage.getItem('apax4_targetVol')) document.getElementById('targetVol').value = localStorage.getItem('apax4_targetVol');
         
-        if(localStorage.getItem('apax3_oldPreset')) document.getElementById('oldPreset').value = localStorage.getItem('apax3_oldPreset');
-        if(localStorage.getItem('apax3_newPreset')) document.getElementById('newPreset').value = localStorage.getItem('apax3_newPreset');
+        if(localStorage.getItem('apax4_oldPreset')) document.getElementById('oldPreset').value = localStorage.getItem('apax4_oldPreset');
+        if(localStorage.getItem('apax4_newPreset')) document.getElementById('newPreset').value = localStorage.getItem('apax4_newPreset');
         
-        ['oldT', 'oldJ', 'oldL', 'newT', 'newJ', 'newL'].forEach(id => {
-            if(localStorage.getItem('apax3_' + id)) document.getElementById(id).value = localStorage.getItem('apax3_' + id);
+        ['oldGH', 'oldKH', 'newGH', 'newKH'].forEach(id => {
+            if(localStorage.getItem('apax4_' + id)) document.getElementById(id).value = localStorage.getItem('apax4_' + id);
         });
 
-        // 載入時執行一次視覺更新 (不觸發防呆還原)
         updateVisuals(true);
     };
 
@@ -371,54 +356,48 @@
         if (!val) return; 
         
         const r = recipes[val];
-        document.getElementById(side + 'T').value = r.t;
-        document.getElementById(side + 'J').value = r.j;
-        document.getElementById(side + 'L').value = r.l;
+        document.getElementById(side + 'GH').value = Math.round(r.gh * 10);
+        document.getElementById(side + 'KH').value = Math.round(r.kh * 10);
         
-        // 告訴 updateVisuals 這是來自選單的更新，不要把選單清空
         updateVisuals(true);
     }
 
     function updateVisuals(fromPreset = false) {
         ['old', 'new'].forEach(side => {
-            const t = parseInt(document.getElementById(side + 'T').value);
-            const j = parseInt(document.getElementById(side + 'J').value);
-            const l = parseInt(document.getElementById(side + 'L').value);
+            const ghRaw = parseInt(document.getElementById(side + 'GH').value);
+            const khRaw = parseInt(document.getElementById(side + 'KH').value);
 
-            document.getElementById(side + 'TVal').innerText = t;
-            document.getElementById(side + 'JVal').innerText = j;
-            document.getElementById(side + 'LVal').innerText = l;
+            const gh = (ghRaw / 10).toFixed(1);
+            const kh = (khRaw / 10).toFixed(1);
 
-            const sum = t + j + l;
-            let pT = 0, pJ = 0, pL = 0;
+            document.getElementById(side + 'GHVal').innerText = gh;
+            document.getElementById(side + 'KHVal').innerText = kh;
+
+            const sum = parseFloat(gh) + parseFloat(kh);
+            let pGH = 0, pKH = 0;
 
             if (sum > 0) {
-                pT = t / sum;
-                pJ = j / sum;
-                pL = l / sum;
+                pGH = parseFloat(gh) / sum;
+                pKH = parseFloat(kh) / sum;
             }
 
-            if(side === 'old') normOld = { t: pT, j: pJ, l: pL };
-            if(side === 'new') normNew = { t: pT, j: pJ, l: pL };
-
-            document.getElementById(side + 'BarT').style.width = (pT * 100) + '%';
-            document.getElementById(side + 'BarJ').style.width = (pJ * 100) + '%';
-            document.getElementById(side + 'BarL').style.width = (pL * 100) + '%';
+            document.getElementById(side + 'BarGH').style.width = (pGH * 100) + '%';
+            document.getElementById(side + 'BarKH').style.width = (pKH * 100) + '%';
 
             const textDiv = document.getElementById(side + 'RatioText');
             if (sum === 0) {
                 textDiv.innerText = "純水 / 未設定";
             } else {
-                textDiv.innerText = `T: ${(pT*100).toFixed(1)}% | J: ${(pJ*100).toFixed(1)}% | L: ${(pL*100).toFixed(1)}%`;
+                textDiv.innerText = `GH: ${gh} ml | KH: ${kh} ml (以600ml計)`;
             }
             
-            // 智慧防呆：如果是手動拉桿導致數值更新，且與目前選單的官方數值不符，自動將選單切換為"請選擇(自訂)"
+            // 智慧防呆：手動拉桿若偏離官方標準值，自動切回自訂
             if (fromPreset !== true) {
                 const presetSelect = document.getElementById(side + 'Preset');
                 const currentVal = presetSelect.value;
                 if (currentVal && currentVal !== "") {
                     const r = recipes[currentVal];
-                    if (t !== r.t || j !== r.j || l !== r.l) {
+                    if (Math.round(r.gh * 10) !== ghRaw || Math.round(r.kh * 10) !== khRaw) {
                         presetSelect.value = "";
                     }
                 }
@@ -427,12 +406,12 @@
     }
 
     function calculate() {
-        localStorage.setItem('apax3_remVol', document.getElementById('remVol').value);
-        localStorage.setItem('apax3_targetVol', document.getElementById('targetVol').value);
-        localStorage.setItem('apax3_oldPreset', document.getElementById('oldPreset').value);
-        localStorage.setItem('apax3_newPreset', document.getElementById('newPreset').value);
-        ['oldT', 'oldJ', 'oldL', 'newT', 'newJ', 'newL'].forEach(id => {
-            localStorage.setItem('apax3_' + id, document.getElementById(id).value);
+        localStorage.setItem('apax4_remVol', document.getElementById('remVol').value);
+        localStorage.setItem('apax4_targetVol', document.getElementById('targetVol').value);
+        localStorage.setItem('apax4_oldPreset', document.getElementById('oldPreset').value);
+        localStorage.setItem('apax4_newPreset', document.getElementById('newPreset').value);
+        ['oldGH', 'oldKH', 'newGH', 'newKH'].forEach(id => {
+            localStorage.setItem('apax4_' + id, document.getElementById(id).value);
         });
 
         const remVol = parseFloat(document.getElementById('remVol').value) || 0;
@@ -443,30 +422,30 @@
             return;
         }
 
-        const old_t = remVol * (normOld.t / 200);
-        const old_j = remVol * (normOld.j / 200);
-        const old_l = remVol * (normOld.l / 200);
+        const oldGHCoeff = (parseInt(document.getElementById('oldGH').value) / 10) / 600;
+        const oldKHCoeff = (parseInt(document.getElementById('oldKH').value) / 10) / 600;
 
-        const new_t = targetVol * (normNew.t / 200);
-        const new_j = targetVol * (normNew.j / 200);
-        const new_l = targetVol * (normNew.l / 200);
+        const newGHCoeff = (parseInt(document.getElementById('newGH').value) / 10) / 600;
+        const newKHCoeff = (parseInt(document.getElementById('newKH').value) / 10) / 600;
 
-        const add_t = Math.max(0, new_t - old_t);
-        const add_j = Math.max(0, new_j - old_j);
-        const add_l = Math.max(0, new_l - old_l);
+        // 計算既有量與目標量 (以母液 ml 數計)
+        const old_gh_ml = remVol * oldGHCoeff;
+        const old_kh_ml = remVol * oldKHCoeff;
+
+        const new_gh_ml = targetVol * newGHCoeff;
+        const new_kh_ml = targetVol * newKHCoeff;
+
+        const add_gh = Math.max(0, new_gh_ml - old_gh_ml);
+        const add_kh = Math.max(0, new_kh_ml - old_kh_ml);
         const add_water = targetVol - remVol;
 
         document.getElementById('resWater').innerText = add_water.toFixed(0) + ' ml';
-        document.getElementById('resTonic').innerText = '+ ' + add_t.toFixed(2) + ' ml';
-        document.getElementById('resJamm').innerText = '+ ' + add_j.toFixed(2) + ' ml';
-        document.getElementById('resLylac').innerText = '+ ' + add_l.toFixed(2) + ' ml';
+        document.getElementById('resGH').innerText = '+ ' + add_gh.toFixed(2) + ' ml';
+        document.getElementById('resKH').innerText = '+ ' + add_kh.toFixed(2) + ' ml';
 
         document.getElementById('resultBox').style.display = 'block';
     }
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
